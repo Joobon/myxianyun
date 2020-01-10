@@ -19,11 +19,16 @@
       >
         <ul class="item_main2">
           <li v-for="(item1,index) in item.children" :key="index">
-            <a>
+            <!-- <a>
               <i>{{index+1}}</i>
               <strong>{{item1.city}}</strong>
               <span>{{item1.desc}}</span>
-            </a>
+            </a> -->
+            <nuxt-link :to="`/post?city=${item1.city}`">
+              <i>{{index+1}}</i>
+              <strong>{{item1.city}}</strong>
+              <span>{{item1.desc}}</span>
+            </nuxt-link>
           </li>
         </ul>
       </div>
@@ -66,7 +71,6 @@ export default {
 </script>
 
 <style lang='less' scoped>
-
 .navs {
   width: 260px;
   position: relative;
@@ -84,14 +88,17 @@ export default {
     border-right: 1px solid #ddd;
     padding: 0 10px 0 20px;
     font-size: 14px;
+    span{
+       cursor: pointer;
+    }
     .el-icon-arrow-right {
       font-size: 20px;
       color: #ddd;
     }
   }
-  .iii{
-  border-right: 1px solid #fff;
-  color:orange;
+  .iii {
+    border-right: 1px solid #fff;
+    color: orange;
   }
   .item_main1 {
     position: absolute;
@@ -114,12 +121,17 @@ export default {
           i {
             color: orange;
             font-size: 24px;
+            cursor: pointer;
           }
           span:hover {
             text-decoration: underline;
+            color: orange;
+            cursor: pointer;
           }
           strong:hover {
             text-decoration: underline;
+            color: orange;
+            cursor: pointer;
           }
           strong {
             margin: 0 10px;
@@ -131,13 +143,12 @@ export default {
     }
   }
 }
-  .tcity {
-    width: 260px  ;
-    margin-top: 20px;
-    img {
-      width: 100%;
-      height: 160px;
-    }
+.tcity {
+  width: 260px;
+  margin-top: 20px;
+  img {
+    width: 100%;
+    height: 160px;
   }
-
+}
 </style>

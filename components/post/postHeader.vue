@@ -1,38 +1,40 @@
 <template>
   <div>
     <div class="search">
-      <input type="text" placeholder="请输入想去的地方，比如：'广州'" />
-      <i class="el-icon-search"></i>
+      <input type="text" placeholder="请输入想去的地方，比如：'广州'" v-model="city" />
+      <i class="el-icon-search" @click="Go"></i>
     </div>
     <div class="tuijian">
       推荐：
-      <span>广州</span>&nbsp;
-      <span>上海</span>&nbsp;
-      <span>北京</span>
+      <span @click="GG(item)" v-for="(item,index) in cityArr" :key="index">{{item}}</span>
+      &nbsp;
     </div>
     <div class="gonglue">
       <h4>推荐攻略</h4>
       <span></span>
-      <el-button type="primary">
+      <el-button type="primary" @click="$router.push({path:'post/travel'})">
         <i class="el-icon-edit"></i>&nbsp;&nbsp;&nbsp;写游记
       </el-button>
     </div>
     <div class="kuai">
-      <div v-for="(post,index) in postList" :key="index">
+      <div v-for="(post,index) in dataList" :key="index">
         <div v-if="post.images.length>=3" class="main1">
           <div class="jieshao">
             <h4>
-              <a href="#">"{{post.title}}"</a>
+              <a href="#">{{post.title}}</a>
             </h4>
-            <a href=""><p>{{post.summary}}</p></a>
+            <a href>
+              <p v-html="post.summary"></p>
+            </a>
           </div>
-          <a href="" class="imgs">
-            <img :src="item" v-for="(item,index) in post.images.slice(0,3)" :key="index" alt />  
+          <a href class="imgs">
+            <img :src="item" v-for="(item,index) in post.images.slice(0,3)" :key="index" alt />
           </a>
           <div class="foot">
             <div class="left">
               <span>
-                <i class="el-icon-location-outline"></i>{{post.cityName}}&nbsp;by&nbsp;
+                <i class="el-icon-location-outline"></i>
+                {{post.cityName}}&nbsp;by&nbsp;
               </span>
               <div class="user">
                 <a href="#">
@@ -53,17 +55,20 @@
           </a>
           <div class="jieshao">
             <h4>
-              <a href>"{{post.title}}"</a>
+              <a href>{{post.title}}</a>
             </h4>
-            <a href="#"><p>{{post.summary}}</p></a>
+            <a href="#">
+              <p v-html="post.summary"></p>
+            </a>
             <div class="foot">
               <div class="left">
                 <span>
-                  <i class="el-icon-location-outline"></i>{{post.cityName}}&nbsp;by&nbsp;
+                  <i class="el-icon-location-outline"></i>
+                  {{post.cityName}}&nbsp;by&nbsp;
                 </span>
                 <div class="user">
                   <a href="#">
-                   <img :src="`${$axios.defaults.baseURL}${post.account.defaultAvatar}`" alt />
+                    <img :src="`${$axios.defaults.baseURL}${post.account.defaultAvatar}`" alt />
                   </a>
                   <a href>{{post.account.nickname}}</a>
                 </div>
@@ -75,20 +80,23 @@
             </div>
           </div>
         </div>
-        <div v-if="post.images.length=0" class="main3">
+        <div v-if="post.images.length===0" class="main3">
           <div class="jieshao">
             <h4>
               <a href>"{{post.title}}"</a>
             </h4>
-            <a href="#"><p>{{post.summary}}</p></a>
+            <a href="#">
+               <p v-html="post.summary"></p>
+            </a>
             <div class="foot">
               <div class="left">
                 <span>
-                  <i class="el-icon-location-outline"></i>{{post.cityName}}&nbsp;by&nbsp;
+                  <i class="el-icon-location-outline"></i>
+                  {{post.cityName}}&nbsp;by&nbsp;
                 </span>
                 <div class="user">
                   <a href="#">
-                   <img :src="`${$axios.defaults.baseURL}${post.account.defaultAvatar}`" alt />
+                    <img :src="`${$axios.defaults.baseURL}${post.account.defaultAvatar}`" alt />
                   </a>
                   <a href>{{post.account.nickname}}</a>
                 </div>
@@ -101,6 +109,16 @@
           </div>
         </div>
       </div>
+
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="pageIndex"
+        :page-sizes="[2, 4, 6, 8]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+      ></el-pagination>
     </div>
   </div>
 </template>
@@ -109,16 +127,91 @@
 export default {
   data() {
     return {
-      postList: []
+      cityArr: ["广州", "上海", "北京"],
+      city: null,
+      postList: [],
+      // 当前页
+      pageIndex: 1,
+      // 每页加载量
+      pageSize: 2,
+      //  总数
+      total: 0
     };
   },
+  computed: {
+    dataList() {
+      return this.postList.slice(
+        this.$route.query._start,
+        this.$route.query._limit
+      );
+    }
+  },
+  methods: {
+    GG(item) {
+      this.city = item;
+      this.getData();
+    },
+    Go() {
+      if (this.city === "") {
+        this.getData2()
+      } else {
+        this.getData();
+      }
+    },
+    getData() {
+      this.$axios({
+        url: "/posts",
+        params: {
+          _start: (this.pageIndex - 1) * this.pageSize,
+          _limit: this.pageSize,
+          city: this.city
+        }
+      }).then(res => {
+        // console.log(res)
+        this.postList = res.data.data;
+        this.total = res.data.total;
+      });
+    },
+    getData2() {
+      this.$axios({
+        url: "/posts",
+        params: {
+          _start: (this.pageIndex - 1) * this.pageSize,
+          _limit: this.pageSize
+        }
+      }).then(res => {
+        this.postList = res.data.data;
+        this.total = res.data.total;
+      });
+    },
+    handleSizeChange(val) {
+      this.pageSize = val;
+      this.handleCurrentChange(1)
+      console.log(this.dataList);
+    },
+    handleCurrentChange(val) {
+      this.pageIndex = val;
+      if (this.city === "") {
+       this.getData2()
+      } else {
+        this.getData();
+      }
+    }
+  },
+  //监听路由参数，跳转城市
+  watch: {
+    $route() {
+      this.city = this.$route.query.city;
+      this.handleCurrentChange(1);
+    }
+  },
   mounted() {
-    this.$axios({
-      url: "/posts"
-    }).then(res => {
-      console.log(res);
-      this.postList = res.data.data;
-    });
+    if (this.$route.query.city !== null) {
+      this.city = this.$route.query.city;
+      this.getData();
+    } else {
+      this.getData();
+    }
   }
 };
 </script>
@@ -153,6 +246,11 @@ export default {
   color: #666;
   span {
     margin-right: 5px;
+  }
+  span:hover {
+    color: orange;
+    text-decoration: underline;
+    cursor: pointer;
   }
 }
 .gonglue {
@@ -303,11 +401,9 @@ export default {
     }
   }
 }
-.main2 {
+.main3 {
   padding: 20px 0;
   border-bottom: 1px solid #ddd;
-  display: flex;
-  justify-content: space-between;
   .jieshao {
     h4 {
       font-size: 18px;
@@ -359,5 +455,8 @@ export default {
       }
     }
   }
+}
+.el-pagination {
+  margin: 20px 0;
 }
 </style>

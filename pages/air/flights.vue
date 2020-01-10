@@ -102,7 +102,7 @@ export default {
             params: this.$route.query
         }).then(res => {
             // 赋值给总数据，但是该变量中的flights在过滤时候会被修改
-            // console.log(res);
+            console.log(res);
             
             this.flightsData = res.data;
             // 这个是缓存的变量，一旦赋值之后不能被改
